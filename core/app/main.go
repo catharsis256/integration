@@ -1,6 +1,7 @@
 package main
 
 import (
+	"com.smartblocklab/integration/core/service"
 	"context"
 	"os"
 	"os/signal"
@@ -23,9 +24,17 @@ func main() {
 		select {
 		case <-c:
 			cancel()
+			println("Context cancel completed")
 		case <-ctx.Done():
+			println("Program finished")
 		}
 	}()
 
-
+	go func() {
+		proxy := service.NewSupervisorProxy(service.NewSupervisorService())
+		if sInterface, ok := proxy.(*service.SupervisorProxy); ok {
+			sInterface.Initiate(ctx)
+			println("SupervisorProxy initiated")
+		}
+	}()
 }
