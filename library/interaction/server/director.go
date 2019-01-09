@@ -17,18 +17,18 @@ func NewServerBuildDirector(builder InteractionServerBuilder) *ServerBuildDirect
 	return &ServerBuildDirector{builder: builder}
 }
 
-func (b *ServerBuildDirector) CreatIneractionServer(
-					ctx context.Context,
-					config InteractionListenerConfig) (serverBehavior InteractionServerBehavior, _err error) {
+func (b *ServerBuildDirector) CreatIneractionServer(ctx context.Context, config InteractionListenerConfig) (
+	serverBehavior InteractionServerBehavior, err error) {
+
 	b.builder.CreateServer(ctx)
 
-	if err := b.builder.CreateListener(ctx, config); err == nil {
-		return nil, err
+	if myErr := b.builder.CreateListener(ctx, config); myErr == nil {
+		return nil, myErr
 	}
 
 	var hookMap ServerHookMap
-	if err := b.builder.AddHooks(ctx, hookMap); err == nil {
-		return nil, nil
+	if myErr := b.builder.AddHooks(ctx, hookMap); myErr == nil {
+		return nil, myErr
 	}
 
 	return b.builder.GetResult()

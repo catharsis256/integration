@@ -1,15 +1,21 @@
 package server
 
-import "errors"
+import (
+	"context"
+	"errors"
+)
 
 type ServerContextBehavior interface {
 	ChangeState(newState ServerStateBehavior)
 	GetServerBehavior() (serverBehavior InteractionServerBehavior, err error)
+	SetServerBehavior(InteractionServerBehavior)
+	GetListenerConfig() (InteractionListenerConfig, error)
 }
 
 type ServerContext struct {
 	serverBehavior InteractionServerBehavior
-	stateBehavior ServerStateBehavior
+	stateBehavior  ServerStateBehavior
+	listenerConfig InteractionListenerConfig
 }
 
 func NewServerContext(interactionServBehavior InteractionServerBehavior) *ServerContext {
@@ -17,7 +23,7 @@ func NewServerContext(interactionServBehavior InteractionServerBehavior) *Server
 		panic(errors.New("ILLEGAL ARGUMENT WAS PASSED: INTERACTION SERVER BEHAVIOR"))
 	}
 
-	return &ServerContext{stateBehavior: NewInitiateServingState(), serverBehavior: interactionServBehavior}
+	return &ServerContext{stateBehavior: NewUninitializedState()}
 }
 
 func (c *ServerContext) ChangeState(newState ServerStateBehavior) {
@@ -32,33 +38,61 @@ func (c *ServerContext) GetServerBehavior() (serverBehavior InteractionServerBeh
 	return nil, errors.New("INTERACTION SERVER BEHAVIOR WAS NOT CONFIGURED")
 }
 
+func (c *ServerContext) SetServerBehavior(serverBehavior InteractionServerBehavior) {
+	if serverBehavior == nil {
+		panic(errors.New("INTERACTION SERVER BEHAVIOR WAS NOT CONFIGURED"))
+	}
 
-//-----------------------------------
-type ServerStateBehavior interface {
-	Inquire(ServerContextBehavior) error
+	c.serverBehavior = serverBehavior
+}
+
+func (c *ServerContext) GetListenerConfig() (listenerConfig InteractionListenerConfig, err error) {
+	if c.listenerConfig == nil {
+		panic(errors.New("INTERACTION SERVER CONFIGURATION DID NOT SET"))
+	}
+
+	return c.listenerConfig, nil
 }
 
 //-----------------------------------
-type UninitializedState struct { }
+type ServerStateBehavior interface {
+	Inquire(context.Context, ServerContextBehavior) error
+}
+
+//-----------------------------------
+type UninitializedState struct{}
 
 func NewUninitializedState() ServerStateBehavior {
 	return &UninitializedState{}
 }
 
-func (s *UninitializedState) Inquire(context ServerContextBehavior) error {
-	// stub
+func (s *UninitializedState) Inquire(ctx context.Context, context ServerContextBehavior) error {
 	buildDirector := NewServerBuildDirector(NewGrpcServerBuilder())
+
+	var err error
+	var config InteractionListenerConfig
+	if config, err = context.GetListenerConfig(); err != nil {
+		return err
+	}
+
+	var serverBehavior InteractionServerBehavior
+	if serverBehavior, err = buildDirector.CreatIneractionServer(ctx, config); err != nil {
+		return err
+	}
+
+	context.SetServerBehavior(serverBehavior)
+
 	return nil
 }
 
 //-----------------------------------
-type InitiateServingState struct { }
+type InitiateServingState struct{}
 
 func NewInitiateServingState() ServerStateBehavior {
 	return &InitiateServingState{}
 }
 
-func (s *InitiateServingState) Inquire(context ServerContextBehavior) error {
+func (s *InitiateServingState) Inquire(ctx context.Context, context ServerContextBehavior) error {
 	var servBehavior InteractionServerBehavior
 	var err error
 
@@ -82,7 +116,7 @@ func NewHandlingRequestState() ServerStateBehavior {
 	return &RequestHandlingState{}
 }
 
-func (s *RequestHandlingState) Inquire(context ServerContextBehavior) error {
+func (s *RequestHandlingState) Inquire(ctx context.Context, context ServerContextBehavior) error {
 	// stub
 
 	return nil
