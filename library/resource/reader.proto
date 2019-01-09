@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package greater;
+
+service GreaterService {
+    rpc Greet(GreeterRequest) returns (GreeterResponse) {}
+}
+
+message GreeterRequest {
+    string greeting = 1;
+    string name = 2;
+}
+
+message GreeterResponse {
+    string response = 1;
+}
