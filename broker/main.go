@@ -1,12 +1,19 @@
-package broker
+package main
 
 import (
 	"context"
-	"gitlab.smartblocklab.com/integration/broker/service"
 	"os"
 	"os/signal"
 	"syscall"
 )
+
+/**
+https://medium.com/seek-blog/microservices-in-go-2fc1570f6800
+https://github.com/go-kit/kit/tree/master/examples/addsvc/pkg
+http://www.ru-rocker.com/2017/04/17/micro-services-using-go-kit-service-discovery/
+https://github.com/peterbourgon/go-microservices
+
+*/
 
 func main() {
 	ctx := context.Background()
@@ -31,7 +38,7 @@ func main() {
 	}()
 
 	go func() {
-		service.NewSupervisorHolder(service.NewSupervisorService()).GetService().Initiate(ctx)
+		// ... a(ctx)
 		println("SupervisorHolder initiated")
 	}()
 }
