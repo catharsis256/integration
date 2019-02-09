@@ -1,13 +1,13 @@
 package poller
 
 type DepositStrategy struct {
-	Task DepositTask
+	task DepositTask
 }
 
 func MakeDepositStrategy(task DepositTask) PollingStrategy {
-	return &DepositStrategy{Task: task}
+	return &DepositStrategy{task: task}
 }
 
 func (bis *DepositStrategy) Poll() {
-	bis.Task.Run()
+	bis.task.Run()
 }
