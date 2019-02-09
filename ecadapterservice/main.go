@@ -8,11 +8,12 @@ import (
 )
 
 /**
+Following articles should help me develop this project:
+
 https://medium.com/seek-blog/microservices-in-go-2fc1570f6800
 https://github.com/go-kit/kit/tree/master/examples/addsvc/pkg
-http://www.ru-rocker.com/2017/04/17/micro-services-using-go-kit-service-discovery/
 https://github.com/peterbourgon/go-microservices
-
+http://callistaenterprise.se/blogg/teknik/2017/02/21/go-blog-series-part2/
 */
 
 func main() {
